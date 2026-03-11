@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-predict {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-predict:active {
+            transform: translateY(0);
+        }
+
+        .btn-clear {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-clear:hover {
+            background: #e8e8e8;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
+        }
+
+        .result-container.success {
+            background: #f0f9ff;
+            border: 2px solid #00a5ff;
+            display: block;
+        }
+
+        .result-container.error {
+            background: #fff5f5;
+            border: 2px solid #ff6b6b;
+            display: block;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .result-prediction {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .result-container.success .result-prediction {
+            color: #00a5ff;
+        }
+
+        .result-container.error .result-prediction {
+            color: #ff6b6b;
+        }
+
+        .probability-chart {
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .probability-item {
+            margin-bottom: 15px;
+        }
+
+        .probability-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .probability-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .feature-info {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .feature-info h4 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Diabetes Prediction System</h1>
+            <p>Enter your medical values to get a diabetes prediction</p>
+        </div>
+
+        <form id="predictionForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="pregnancies">Pregnancies</label>
+                    <input type="number" id="pregnancies" name="Pregnancies" min="0" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="plasmaGlucose">Plasma Glucose</label>
+                    <input type="number" id="plasmaGlucose" name="PlasmaGlucose" min="0" step="0.1" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="diastolicBP">Diastolic Blood Pressure</label>
+                    <input type="number" id="diastolicBP" name="DiastolicBloodPressure" min="0" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="tricepsThickness">Triceps Thickness</label>
+                    <input type="number" id="tricepsThickness" name="TricepsThickness" min="0" step="0.1" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="serumInsulin">Serum Insulin</label>
+                    <input type="number" id="serumInsulin" name="SerumInsulin" min="0" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="bmi">BMI (Body Mass Index)</label>
+                    <input type="number" id="bmi" name="BMI" min="0" step="0.01" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="diabetesPedigree">Diabetes Pedigree</label>
+                    <input type="number" id="diabetesPedigree" name="DiabetesPedigree" min="0" step="0.001" required>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age (years)</label>
+                    <input type="number" id="age" name="Age" min="0" step="0.1" required>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-predict">Predict</button>
+                <button type="reset" class="btn-clear">Clear</button>
+            </div>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Processing your request...</p>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="result-label">Prediction Result</div>
+            <div class="result-prediction" id="resultPrediction"></div>
+            <div class="probability-chart" id="probabilityChart"></div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="feature-info">
+            <h4>📋 Feature Definitions</h4>
+            <p><strong>Pregnancies:</strong> Number of times pregnant</p>
+            <p><strong>Plasma Glucose:</strong> Plasma glucose concentration (mg/dL)</p>
+            <p><strong>Diastolic BP:</strong> Diastolic blood pressure (mmHg)</p>
+            <p><strong>Triceps Thickness:</strong> Triceps skin fold thickness (mm)</p>
+            <p><strong>Serum Insulin:</strong> 2-Hour serum insulin (µU/mL)</p>
+            <p><strong>BMI:</strong> Body mass index (kg/m²)</p>
+            <p><strong>Diabetes Pedigree:</strong> Diabetes pedigree function</p>
+            <p><strong>Age:</strong> Age in years</p>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const loadingDiv = document.getElementById('loading');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultPrediction = document.getElementById('resultPrediction');
+        const probabilityChart = document.getElementById('probabilityChart');
+        const errorMessage = document.getElementById('errorMessage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Prepare the data
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            // Convert string values to numbers
+            Object.keys(data).forEach(key => {
+                data[key] = parseFloat(data[key]);
+            });
+
+            // Show loading indicator
+            loadingDiv.style.display = 'block';
+            resultContainer.style.display = 'none';
+
+            try {
+                // Send prediction request
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Prediction failed');
+                }
+
+                const result = await response.json();
+
+                // Display prediction result
+                resultPrediction.textContent = result.prediction_label;
+
+                // Create probability visualization
+                const probDiabetic = result.probability_diabetic * 100;
+                const probNotDiabetic = result.probability_not_diabetic * 100;
+
+                probabilityChart.innerHTML = `
+                    <div class="probability-item">
+                        <div class="probability-label">
+                            <span>Diabetic</span>
+                            <span>${probDiabetic.toFixed(1)}%</span>
+                        </div>
+                        <div class="probability-bar">
+                            <div class="probability-fill" style="width: ${probDiabetic}%"></div>
+                        </div>
+                    </div>
+                    <div class="probability-item">
+                        <div class="probability-label">
+                            <span>Not Diabetic</span>
+                            <span>${probNotDiabetic.toFixed(1)}%</span>
+                        </div>
+                        <div class="probability-bar">
+                            <div class="probability-fill" style="width: ${probNotDiabetic}%"></div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0; font-size: 13px; color: #666;">
+                        <strong>Confidence:</strong> ${result.confidence.toFixed(1)}%
+                    </div>
+                `;
+
+                // Show result container
+                resultContainer.classList.remove('error');
+                resultContainer.classList.add('success');
+                errorMessage.textContent = '';
+                resultContainer.style.display = 'block';
+
+            } catch (err) {
+                console.error('Error:', err);
+                resultPrediction.textContent = 'Error';
+                errorMessage.textContent = `Error: ${err.message}`;
+                resultContainer.classList.remove('success');
+                resultContainer.classList.add('error');
+                probabilityChart.innerHTML = '';
+                resultContainer.style.display = 'block';
+
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
