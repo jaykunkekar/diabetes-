@@ -1,0 +1,13 @@
+Role: You are an expert Python Machine Learning Engineer and Web Developer.
+
+Task: Build a full-stack machine learning application using the diabetes.csv dataset. The target label to predict is diabetic.
+
+Please provide the following components:
+
+Model Training Script (train.py): Write a script to load the data, split it into training and validation sets, and train a Random Forest Classifier (two-class decision forest). Save the trained model using joblib or pickle.
+
+Flask Backend (app.py): Create a Flask server that loads the saved model and creates a prediction route.
+
+Frontend UI (templates/index.html): Create a clean, user-friendly HTML/CSS web interface with a form to input the required medical values. It should display the final prediction (Diabetic / Not Diabetic) clearly on the page.
+
+Documentation (README.md): Write a README file with step-by-step instructions on how to install dependencies (provide a requirements.txt list), run the training script, and start the Flask server.
